@@ -7,7 +7,7 @@
 
 <div align="center">
 
-  [![.github/workflows/ci.yml](https://github.com/Savjee/SavjeeCoin/actions/workflows/ci.yml/badge.svg)](https://github.com/Savjee/SavjeeCoin/actions/workflows/ci.yml)
+  [![.github/workflows/ci.yml](https://github.com/Phoenix-rat/VestCoin/actions/workflows/ci.yml/badge.svg)](https://github.com/Savjee/SavjeeCoin/actions/workflows/ci.yml)
   [![Coverage Status](https://coveralls.io/repos/github/Savjee/SavjeeCoin/badge.svg?branch=master)](https://coveralls.io/github/Savjee/SavjeeCoin?branch=master)
   [![GitHub Issues](https://img.shields.io/github/issues/Savjee/SavjeeCoin.svg)](https://github.com/Savjee/SavjeeCoin/issues)
   [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/Savjee/SavjeeCoin.svg)](https://github.com/Savjee/SavjeeCoin/pulls)
