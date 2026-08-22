@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { Blockchain } = require('../src/blockchain');
+const { Blockchain, Transaction } = require('../src/blockchain');
 const { createSignedTx, signingKey, createBlockchainWithTx, createBCWithMined } = require('./helpers');
 
 let blockchain = null;
@@ -79,6 +79,56 @@ describe('Blockchain class', function() {
 
       blockchain.minePendingTransactions(walletAddr);
       assert.strict.equal(blockchain.getBalanceOfAddress(walletAddr), 180);
+    });
+
+    // It should be allowed to create a transaction from and to the same address
+    // This tests make sure that it works and that the balance of the wallet
+    // stays the same.
+    // Discussion: https://github.com/Savjee/SavjeeCoin/pull/52
+    it('should work with cyclic transactions', function() {
+      const walletAddr = signingKey.getPublic('hex');
+      const blockchain = createBlockchainWithTx();
+
+      assert.strict.equal(blockchain.getBalanceOfAddress(walletAddr), 80);
+
+      // Create new transaction to self
+      const tx = new Transaction(walletAddr, walletAddr, 80);
+      tx.timestamp = 1;
+      tx.sign(signingKey);
+
+      blockchain.addTransaction(tx);
+      blockchain.minePendingTransactions('no_addr');
+      assert.strict.equal(blockchain.getBalanceOfAddress(walletAddr), 80);
+    });
+  });
+
+  describe('minePendingTransactions', function() {
+    // It should not be possible for a user to create multiple pending
+    // transactions for a total amount higher than his balance.
+    // In this test we start with this situation:
+    //    - Wallet "walletAddr" -> 80 coins (100 mining reward - 2 test tx)
+    //    - Wallet "wallet2" -> 0 coins
+    it('should not allow pending transactions to go below zero', function() {
+      const blockchain = createBlockchainWithTx();
+      const walletAddr = signingKey.getPublic('hex');
+
+      // Verify that the wallets have the correct balance
+      assert.strict.equal(blockchain.getBalanceOfAddress('wallet2'), 0);
+      assert.strict.equal(blockchain.getBalanceOfAddress(walletAddr), 80);
+
+      // Create a transaction for 80 coins (from walletAddr -> "wallet2")
+      blockchain.addTransaction(createSignedTx(80));
+
+      // Try tro create another transaction for which we don't have the balance.
+      // Blockchain should refuse this!
+      assert.throws(() => { blockchain.addTransaction(createSignedTx(80)); }, Error);
+
+      // Mine transactions, send rewards to another address
+      blockchain.minePendingTransactions(1);
+
+      // Verify that the first transaction did go through.
+      assert.strict.equal(blockchain.getBalanceOfAddress(walletAddr), 0);
+      assert.strict.equal(blockchain.getBalanceOfAddress('wallet2'), 80);
     });
   });
 
